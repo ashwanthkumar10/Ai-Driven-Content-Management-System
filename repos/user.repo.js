@@ -19,7 +19,6 @@ export const findRoleByName = async(roleName) => {
    const test = await prisma.roles.findUnique({
     where: { role_name: roleName },
   });
-  console.log("testig roles",test);
   
   return test;
 };
@@ -33,3 +32,8 @@ export const editUser = async (id, data) => {
   return updatedUser;
 };
 
+
+export const getAllUsers = async () => {
+  const users = await prisma.users.findMany({});
+  return users;
+}

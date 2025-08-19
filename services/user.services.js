@@ -55,4 +55,9 @@ export const editUser = async ({ id, name, email, password, phone, roleName }) =
   return updatedUser;
 };
 
-export default { createUser, editUser };
+export const getAllUsers = async () => {
+  const users = await UserRepo.getAllUsers();
+  return users;
+}
+
+export default { createUser, editUser , getAllUsers };

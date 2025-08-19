@@ -11,7 +11,7 @@ datasource db {
 model permissions {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   role_id        String?  @db.Uuid
-  permission_key String   @db.VarChar(30)
+  permission_key String   @db.VarChar(50)
   description    String?
   roles          roles?   @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }

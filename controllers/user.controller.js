@@ -29,8 +29,19 @@ export const editUser = async (req, res) => {
   }
 }
 
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await UserService.getAllUsers();    
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+
+}
 
 export default {
   createUser,
-  editUser
+  editUser , 
+  getAllUsers
 };
