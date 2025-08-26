@@ -10,17 +10,17 @@ export const createUser = async (data) => {
   const createUser = await prisma.users.create({
     data,
   });
-  console.log("too long" , createUser);
+
   
   return createUser; 
 };
 
 export const findRoleByName = async(roleName) => {
-   const test = await prisma.roles.findUnique({
+   const name = await prisma.roles.findUnique({
     where: { role_name: roleName },
   });
   
-  return test;
+  return name;
 };
 
 // Edit user by id
@@ -36,4 +36,11 @@ export const editUser = async (id, data) => {
 export const getAllUsers = async () => {
   const users = await prisma.users.findMany({});
   return users;
+}
+
+export const findUserByEmail = async(email) => {
+  const user = await prisma.users.findUnique({
+    where: { email },
+  });
+  return user;
 }
