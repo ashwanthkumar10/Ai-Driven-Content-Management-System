@@ -1,36 +1,6 @@
 import * as UserService from '../services/user.services.js';
 
 
-export const login = async(req, res) =>{
- try {
-   const {email, password} = req.body;
-
-    if(!email || !password){
-      return res.status(400).json({message: "Email and password are required"});
-    }
-    
-    
-  const response = await UserService.login({email, password});
-  return res.status(200).json(response);
- } catch (error) {
-  console.error("Error logging in user:", error);
-  res.status(500).json({ message: "Internal Server Error" });
- }
- 
-}
-
-export const createUser = async (req, res) => {
-  try {
-    const { name, email, password, phone, roleName } = req.body;
-
-    const user = await UserService.createUser({ name, email, password, phone, roleName });
-    res.status(201).json(user);
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-
-}
 
 export const editUser = async (req, res) => {
   try {
@@ -62,8 +32,8 @@ export const getAllUsers = async (req, res) => {
 
 
 export default {
-  createUser,
+  
   editUser , 
   getAllUsers ,
-  login
+  
 };
