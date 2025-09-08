@@ -1,14 +1,12 @@
-import pkg from "@prisma/client";
-const { PrismaClient } = pkg; 
 import prisma from "../config/db.js";
 
 
 
 
-export const createUser = async (data) => {
+export const signup = async (data) => {
   // `data` should already have hashed_password and role_id set
   const createUser = await prisma.users.create({
-    data,
+    data
   });
 
   
