@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.roles.createMany({
+  await prisma.role.createMany({
     data: [
       { role_name: 'Creator' },
       { role_name: 'Admin' },

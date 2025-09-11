@@ -8,6 +8,9 @@ export function requirePermission(permission) {
 
   return async (req, res, next) => {
     try {
+      const userId = req.user?.id;
+      console.log("this is the user id in permission middleware" , userId);
+      
       // Check if user is authenticated
       if (!req.user) {
         return res.status(401).json({
@@ -17,14 +20,14 @@ export function requirePermission(permission) {
       }
 
       // Check if user ID exists
-      if (!req.user.id) {
+      if (!userId) {
         return res.status(401).json({
           success: false,
           error: "Invalid user authentication"
         });
       }
 
-      const userId = req.user.id;
+      
       const allowed = await checkPermission(userId, permission);
 
       if (!allowed) {
@@ -50,7 +53,11 @@ export function requirePermission(permission) {
         });
       }
 
-      return res.status(500).json({
+      return res.status(500).json(
+        console.error(`Error checking permission ${permission}:`, err),
+        
+        {
+        
         success: false,
         error: "Internal server error",
         message: "Failed to verify permissions"

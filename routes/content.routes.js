@@ -5,9 +5,9 @@ import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/create-content",authMiddleware, requirePermission("create:content"), contentController.createContent);
-// router.get("/", requirePermission("read:content"), contentController.getAll);
-// router.put("/:id", requirePermission("update:content"), contentController.update);
-// router.delete("/:id", requirePermission("delete:content"), contentController.remove);
+router.post("/create-content", authMiddleware, requirePermission("create_content"), contentController.createContent);
+router.get("/get-all-contents" ,authMiddleware, requirePermission("view_content"), contentController.getAllContents);
+// router.put("/:id", requirePermission("edit_content"), contentController.update);
+// router.delete("/:id", requirePermission("delete_content"), contentController.remove);
 
 export default router;

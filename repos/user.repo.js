@@ -5,7 +5,7 @@ import prisma from "../config/db.js";
 
 export const signup = async (data) => {
   // `data` should already have hashed_password and role_id set
-  const createUser = await prisma.users.create({
+  const createUser = await prisma.user.create({
     data
   });
 
@@ -14,7 +14,7 @@ export const signup = async (data) => {
 };
 
 export const findRoleByName = async(roleName) => {
-   const name = await prisma.roles.findUnique({
+   const name = await prisma.role.findUnique({
     where: { role_name: roleName },
   });
   
@@ -23,7 +23,7 @@ export const findRoleByName = async(roleName) => {
 
 // Edit user by id
 export const editUser = async (id, data) => {
-  const updatedUser = await prisma.users.update({
+  const updatedUser = await prisma.user.update({
     where: { id },
     data,
   });
@@ -32,12 +32,12 @@ export const editUser = async (id, data) => {
 
 
 export const getAllUsers = async () => {
-  const users = await prisma.users.findMany({});
+  const users = await prisma.user.findMany({});
   return users;
 }
 
 export const findUserByEmail = async(email) => {
-  const user = await prisma.users.findUnique({
+  const user = await prisma.user.findUnique({
     where: { email },
   });
   return user;

@@ -6,10 +6,10 @@ export const createContent = async (contentData) => {
         const newContent = await prisma.content.create({
             data: contentData,
             include: {
-                user: {
+                author: {
                     select: {
                         id: true,
-                        username: true,
+                        name: true,
                         email: true
                     }
                 }
@@ -18,6 +18,19 @@ export const createContent = async (contentData) => {
         return newContent;
     } catch (error) {
         console.error('Repository Error - Create Content:', error);
+        throw error;
+    }
+}
+
+export const getAllContents = async () => {
+    try {
+        const contents = await prisma.content.findMany({});
+        
+        return contents;
+    }
+
+     catch (error) {
+        console.error('Repository Error - Get All Contents:', error);
         throw error;
     }
 }

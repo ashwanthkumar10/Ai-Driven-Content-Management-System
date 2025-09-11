@@ -8,21 +8,26 @@ export const createContent = async ({ userId, title, description, contentType, m
         }
 
         // Sanitize and validate content type
-        const validContentTypes = ['ARTICLE', 'VIDEO', 'IMAGE', ];
-        if (!validContentTypes.includes(contentType.toLowerCase())) {
-            throw new Error('Invalid content type');
+        const validContentTypes = ['ARTICLE', 'VIDEO', 'IMAGE'];
+        const normalizedContentType = contentType.toUpperCase();
+        if (!validContentTypes.includes(normalizedContentType)) {
+            throw new Error(`Invalid content type. Must be one of: ${validContentTypes.join(', ')}`);
+        }
+
+        // Validate metadata
+        if (!metaData) {
+            throw new Error('Metadata is required');
         }
 
         // Prepare content data with proper formatting
         const contentData = {   
-            user_id: userId,
+            authorId: userId,
             title: title.trim(),
             description: description.trim(),
-            content_type: contentType.toLowerCase(),
-            meta_data: metaData || {},
-            status: status.toLowerCase(),
-            created_at: new Date(),
-            updated_at: new Date()
+            contentType: normalizedContentType,
+            metadata: metaData, // Changed from meta_data to metadata to match schema
+            status: status.toUpperCase() === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'
+            // Remove created_at and updated_at as Prisma handles these automatically
         };
 
         const newContent = await ContentRepo.createContent(contentData);
@@ -33,5 +38,16 @@ export const createContent = async ({ userId, title, description, contentType, m
     }
 }
 
+
+export const getAllContents = async () => {
+    try{
+        const contents = await ContentRepo.getAllContents();
+        return contents;
+    }
+    catch(error){
+        console.error('Service Error - Get All Contents:', error);
+        throw error;
+    }
+}
 
 export default { createContent };

@@ -7,107 +7,107 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// -------------------
-// Permissions
-// -------------------
-model Permission {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  permission_key String  @db.VarChar(50)
-  description    String?
+  // -------------------
+  // Permissions
+  // -------------------
+  model Permission {
+    id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    permission_key String  @db.VarChar(50)
+    description    String?
 
-  roles_permissions RolePermission[]
+    roles_permissions RolePermission[]
 
-  @@map("permissions")
-}
+    @@map("permissions")
+  }
 
-// -------------------
-// Roles
-// -------------------
-model Role {
-  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  role_name  String           @unique @db.VarChar(20)
-  created_at DateTime?        @default(now()) @db.Timestamptz(6)
-  updated_at DateTime?        @default(now()) @db.Timestamptz(6)
+  // -------------------
+  // Roles
+  // -------------------
+  model Role {
+    id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    role_name  String           @unique @db.VarChar(20)
+    created_at DateTime?        @default(now()) @db.Timestamptz(6)
+    updated_at DateTime?        @default(now()) @db.Timestamptz(6)
 
-  users      User[]
-  roles_permissions RolePermission[]
+    users      User[]
+    roles_permissions RolePermission[]
 
-  @@map("roles")
-}
+    @@map("roles")
+  }
 
-// -------------------
-// Users
-// -------------------
-model User {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name            String    @db.VarChar(40)
-  email           String    @unique @db.VarChar(40)
-  hashed_password String    @db.VarChar(100)
-  phone           String?   @db.VarChar(30)
-  role_id         String?   @db.Uuid
-  created_at      DateTime? @default(now()) @db.Timestamptz(6)
-  updated_at      DateTime? @default(now()) @db.Timestamptz(6)
-  is_active       Status    @default(active)
+  // -------------------
+  // Users
+  // -------------------
+  model User {
+    id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    name            String    @db.VarChar(40)
+    email           String    @unique @db.VarChar(40)
+    hashed_password String    @db.VarChar(100)
+    phone           String?   @db.VarChar(30)
+    role_id         String?   @db.Uuid
+    created_at      DateTime? @default(now()) @db.Timestamptz(6)
+    updated_at      DateTime? @default(now()) @db.Timestamptz(6)
+    is_active       Status    @default(active)
 
-  role     Role?     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  contents Content[]
+    role     Role?     @relation(fields: [role_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+    contents Content[]
 
-  @@map("users")
-}
+    @@map("users")
+  }
 
-enum Status {
-  active
-  suspended
-  deleted
-}
+  enum Status {
+    active
+    suspended
+    deleted
+  }
 
-// -------------------
-// Role ↔ Permission (join table)
-// -------------------
-model RolePermission {
-  role_id       String @db.Uuid
-  permission_id String @db.Uuid
+  // -------------------
+  // Role ↔ Permission (join table)
+  // -------------------
+  model RolePermission {
+    role_id       String @db.Uuid
+    permission_id String @db.Uuid
 
-  role       Role        @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  permission Permission  @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+    role       Role        @relation(fields: [role_id], references: [id], onDelete: Cascade)
+    permission Permission  @relation(fields: [permission_id], references: [id], onDelete: Cascade)
 
-  @@id([role_id, permission_id])
-  @@index([permission_id])
-  @@map("roles_permissions")
-}
+    @@id([role_id, permission_id])
+    @@index([permission_id])
+    @@map("roles_permissions")
+  }
 
-// -------------------
-// Content
-// -------------------
-model Content {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  authorId    String        @db.Uuid @map("author_id")
-  author      User          @relation(fields: [authorId], references: [id])
-  title       String
-  description String
-  contentType ContentType   @map("content_type")
-  metadata    Json
-  status      ContentStatus @default(DRAFT)
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  // -------------------
+  // Content
+  // -------------------
+  model Content {
+    id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    authorId    String        @db.Uuid @map("author_id")
+    author      User          @relation(fields: [authorId], references: [id])
+    title       String
+    description String
+    contentType ContentType   @map("content_type")
+    metadata    Json
+    status      ContentStatus @default(DRAFT)
+    createdAt   DateTime      @default(now()) @map("created_at")
+    updatedAt   DateTime      @updatedAt @map("updated_at")
 
-  @@map("content")
-}
+    @@map("content")
+  }
 
-// -------------------
-// Enums
-// -------------------
-enum ContentType {
-  ARTICLE
-  VIDEO
-  IMAGE
+  // -------------------
+  // Enums
+  // -------------------
+  enum ContentType {
+    ARTICLE
+    VIDEO
+    IMAGE
 
-  @@map("content_type")
-}
+    @@map("content_type")
+  }
 
-enum ContentStatus {
-  DRAFT
-  PUBLISHED
+  enum ContentStatus {
+    DRAFT
+    PUBLISHED
 
-  @@map("content_status")
-}
+    @@map("content_status")
+  }

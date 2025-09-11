@@ -44,4 +44,30 @@ export const createContent = async (req, res) => {
     }
 }
 
-export default { createContent };
+export const getAllContents = async (req, res) => {
+    try {
+        // Placeholder for fetching all contents
+            const content = await ContentService.getAllContents();
+            const contents = content.map(c => ({
+                id: c.id,
+                title: c.title,
+                description: c.description,
+                contentType: c.contentType,
+                metadata: c.metadata,
+                status: c.status,   
+            }));
+            return res.status(200).json({
+                success: true,
+                data: contents
+            });
+    } catch (error) {
+        console.error('Error fetching contents:', error);
+        return res.status(500).json({   
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+
+}
+
+export default { createContent , getAllContents };

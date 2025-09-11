@@ -1,5 +1,33 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+// Add more detailed debugging for the Prisma import
+import prisma from '../config/db.js';
+
+
+
+// Ensure database is connected with better error handling
+if (!prisma) {
+    console.error('❌ Prisma is null or undefined');
+    throw new Error('Database connection not initialized - prisma is null/undefined');
+}
+
+if (typeof prisma !== 'object') {
+    console.error('❌ Prisma is not an object, got:', typeof prisma);
+    throw new Error(`Database connection not initialized - expected object, got ${typeof prisma}`);
+}
+
+if (!prisma.user) {
+    console.error('❌ Prisma.user is not available');
+    console.error('Available prisma properties:', Object.keys(prisma));
+    throw new Error('Database connection not initialized - user model not available');
+}
+
+console.log('✅ Prisma connection verified in permission.utils.js');
+
+//------------------------------------
+
+// other than check permission function , all other functions are useful for admin and future use cases 
+//but for now , only checkPermission is used in the project
+
+//-------------------------------------
 
 /**
  * Permission utility functions for checking user permissions
@@ -7,50 +35,63 @@ const prisma = new PrismaClient();
 
 // Permission constants
 export const PERMISSIONS = {
-    // Content permissions
-    CREATE_CONTENT: 'create:content',
-    READ_CONTENT: 'read:content',
-    UPDATE_CONTENT: 'update:content',
-    DELETE_CONTENT: 'delete:content',
-    
-    // User permissions
-    MANAGE_USERS: 'manage:users',
-    VIEW_USERS: 'view:users',
-    
-    // Role permissions
-    MANAGE_ROLES: 'manage:roles',
-    VIEW_ROLES: 'view:roles'
+    CREATE_CONTENT: 'create_content',
+    READ_CONTENT: 'view_content',   // matches DB
+    UPDATE_CONTENT: 'edit_content',
+    DELETE_CONTENT: 'delete_content',
+    MANAGE_USERS: 'manage_users',
+    VIEW_USERS: 'view_users',
+    MANAGE_ROLES: 'manage_roles',
+    VIEW_ROLES: 'view_roles'
 };
+
 
 /**
  * Get user with roles and permissions from database
  * @private
  */
 async function getUserWithRoles(userId) {
-    const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-            roles: {
-                include: {
-                    role: {
-                        include: {
-                            rolePermissions: {
-                                include: {
-                                    permission: true
-                                }
+    console.log('Fetching user with roles and permissions for userId:', userId);
+    
+    // Add additional safety check right before the database call
+    if (!prisma || !prisma.user) {
+        console.error('❌ Prisma or prisma.user is not available at runtime');
+        throw new Error('Database connection lost or not properly initialized');
+    }
+    
+    // Import and use the debug function
+    const { debugUserRole } = await import('./debug.js');
+    await debugUserRole(userId);
+    
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: {
+                role: {
+                    include: {
+                        roles_permissions: {
+                            include: {
+                                permission: true
                             }
                         }
                     }
                 }
             }
+        });
+
+        if (!user) {
+            console.log('❌ User not found for ID:', userId);
+            throw new Error('User not found');
         }
-    });
 
-    if (!user) {
-        throw new Error('User not found');
+        console.log('✅ User found with role:', user.role?.name || 'No role assigned');
+        console.log('User details:', user);
+        
+        return user;
+    } catch (dbError) {
+        console.error('❌ Database query failed:', dbError);
+        throw dbError;
     }
-
-    return user;
 }
 
 /**
@@ -61,15 +102,25 @@ async function getUserWithRoles(userId) {
  */
 export async function checkPermission(userId, requiredPermission) {
     try {
+        console.log(`🔍 Checking permission '${requiredPermission}' for user ${userId}`);
+        
         const user = await getUserWithRoles(userId);
         
-        return user.roles.some(userRole => 
-            userRole.role.rolePermissions.some(rolePermission => 
-                rolePermission.permission.key === requiredPermission
-            )
+        // Check if user has a role and that role has permissions
+        if (!user.role || !user.role.roles_permissions) {
+            console.log('❌ User has no role or role has no permissions');
+            return false;
+        }
+        
+        // Check if any of the role's permissions match the required permission
+        const hasPermission = user.role.roles_permissions.some(rolePermission => 
+            rolePermission.permission.permission_key === requiredPermission
         );
+        
+        console.log(`${hasPermission ? '✅' : '❌'} Permission check result:`, hasPermission);
+        return hasPermission;
     } catch (error) {
-        console.error('Permission check failed:', error);
+        console.error('❌ Permission check failed:', error);
         throw error;
     }
 }
@@ -84,10 +135,12 @@ export async function hasAnyPermission(userId, permissions) {
     try {
         const user = await getUserWithRoles(userId);
         
-        return user.roles.some(userRole => 
-            userRole.role.rolePermissions.some(rolePermission => 
-                permissions.includes(rolePermission.permission.key)
-            )
+        if (!user.role || !user.role.roles_permissions) {
+            return false;
+        }
+
+        return user.role.roles_permissions.some(rolePermission => 
+            permissions.includes(rolePermission.permission.permission_key)
         );
     } catch (error) {
         console.error('Permission check failed:', error);
@@ -104,11 +157,13 @@ export async function getUserPermissions(userId) {
     try {
         const user = await getUserWithRoles(userId);
         
+        if (!user.role || !user.role.roles_permissions) {
+            return [];
+        }
+
         const permissions = new Set();
-        user.roles.forEach(userRole => {
-            userRole.role.rolePermissions.forEach(rolePermission => {
-                permissions.add(rolePermission.permission.key);
-            });
+        user.role.roles_permissions.forEach(rolePermission => {
+            permissions.add(rolePermission.permission.permission_key);
         });
 
         return Array.from(permissions);
