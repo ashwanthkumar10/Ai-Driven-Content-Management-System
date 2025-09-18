@@ -1,13 +1,6 @@
-import * as UserRepo from "../repos/user.repo.js";
+import * as UserRepo from '../repos/user.repo.js';
 
-export const editUser = async ({
-  id,
-  name,
-  email,
-  password,
-  phone,
-  roleName,
-}) => {
+export const editUser = async ({ id, name, email, password, phone, roleName }) => {
   // Hash password if provided
   let hashed_password = undefined;
   if (password) {
@@ -37,4 +30,4 @@ export const getAllUsers = async () => {
   return users;
 };
 
-export default {  editUser, getAllUsers };
+export default { editUser, getAllUsers };

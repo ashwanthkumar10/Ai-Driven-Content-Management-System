@@ -23,7 +23,13 @@ async function main() {
   const rolePermissions = [
     {
       role: 'Admin',
-      permissions: ['create_content', 'edit_content', 'delete_content', 'manage_users', 'view_content'],
+      permissions: [
+        'create_content',
+        'edit_content',
+        'delete_content',
+        'manage_users',
+        'view_content',
+      ],
     },
     {
       role: 'Creator',
