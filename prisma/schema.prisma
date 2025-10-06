@@ -79,20 +79,22 @@ datasource db {
   // -------------------
   // Content
   // -------------------
-  model Content {
-    id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-    authorId    String        @db.Uuid @map("author_id")
-    author      User          @relation(fields: [authorId], references: [id])
-    title       String
-    description String
-    contentType ContentType   @map("content_type")
-    metadata    Json
-    status      ContentStatus @default(DRAFT)
-    createdAt   DateTime      @default(now()) @map("created_at")
-    updatedAt   DateTime      @updatedAt @map("updated_at")
+ model Content {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authorId    String        @db.Uuid @map("author_id")
+  author      User          @relation(fields: [authorId], references: [id])
+  title       String
+  description String
+  searchVector Unsupported("tsvector")? // For full-text search on title and description
+  contentType ContentType   @map("content_type")
+  metadata    Json
+  status      ContentStatus @default(DRAFT)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
 
-    @@map("content")
-  }
+  @@map("content")
+  @@index([metadata(ops: JsonbPathOps)], type: Gin) // Retaining existing GIN index for metadata
+}
 
   // -------------------
   // Enums

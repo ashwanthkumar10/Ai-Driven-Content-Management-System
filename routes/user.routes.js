@@ -5,6 +5,6 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 const router = express.Router();
 
 router.put('/edit-user/:id', authMiddleware, userController.editUser);
-router.get('/get-all-users', authMiddleware, userController.getAllUsers);
+router.get('/get-all-users', userController.getAllUsers);
 
 export default router;
